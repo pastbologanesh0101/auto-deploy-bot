@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Runtime artifacts produced by the bot
+*.db
+*.pid
+deployment_history.db
+target_repo/
+config.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
