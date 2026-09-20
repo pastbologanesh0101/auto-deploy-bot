@@ -3,6 +3,7 @@
 Config can be built explicitly (recommended for tests) or loaded from
 environment variables / a JSON file for real deployments.
 """
+import dataclasses
 import json
 import os
 from dataclasses import dataclass
@@ -21,9 +22,23 @@ class Config:
 
     @classmethod
     def from_file(cls, path="config.json"):
+        """Load config from a JSON file, or defaults if it doesn't exist.
+
+        Raises a clear ValueError (instead of a confusing dataclass
+        TypeError) if the file contains a misspelled or unknown key, since
+        a silently-ignored typo here just deploys with default settings.
+        """
         if os.path.exists(path):
             with open(path) as f:
                 data = json.load(f)
+            valid_fields = {f.name for f in dataclasses.fields(cls)}
+            unknown = sorted(set(data) - valid_fields)
+            if unknown:
+                raise ValueError(
+                    "Unknown key(s) in {}: {}. Valid keys are: {}".format(
+                        path, ", ".join(unknown), ", ".join(sorted(valid_fields))
+                    )
+                )
             return cls(**data)
         return cls()
 
