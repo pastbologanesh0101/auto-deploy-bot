@@ -1,5 +1,9 @@
 # Auto Deployment Bot
 
+[![Tests](https://github.com/pastbologanesh0101/auto-deploy-bot/actions/workflows/tests.yml/badge.svg)](https://github.com/pastbologanesh0101/auto-deploy-bot/actions/workflows/tests.yml)
+[![Python 3.11 | 3.12 | 3.13](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](.github/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 A small, fully self-contained "auto-deploy" bot for a **local** git repo and
 process — no cloud account, no systemd, no CI runner required. It
 demonstrates the complete auto-deploy pattern:
@@ -14,6 +18,17 @@ demonstrates the complete auto-deploy pattern:
    history you can inspect with `python status.py`.
 6. If the post-pull command or the restart fails, automatically roll the
    repo back to the commit it was on before the pull.
+
+## Table of contents
+
+- [Architecture](#architecture)
+- [Webhook signature verification](#webhook-signature-verification)
+- [Configuring a target repo, branch, and restart command](#configuring-a-target-repo-branch-and-restart-command)
+- [Running it](#running-it)
+- [Rollback behavior](#rollback-behavior)
+- [Tests](#tests)
+- [Troubleshooting / FAQ](#troubleshooting--faq)
+- [License](#license)
 
 ## Architecture
 
