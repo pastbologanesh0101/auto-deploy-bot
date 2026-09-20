@@ -164,17 +164,49 @@ pip install -r requirements.txt
 python3 -m unittest discover -s tests -p "test_*.py" -v
 ```
 
-The suite (26 tests) builds real temporary git repositories (a bare
+The suite (30 tests) builds real temporary git repositories (a bare
 "remote" plus two clones) and real short-lived subprocesses for every test —
 nothing is mocked at the git or process level. It covers: webhook signature
 acceptance/rejection, branch filtering, non-push events, end-to-end deploys
 against a real repo, rollback on a failing post-pull command, rollback on a
 failed restart, deployment history recording (success/failure/rollback),
 process-manager start/stop/is_running against real subprocesses with a PID
-file, and polling-mode new-commit detection.
+file (including a stale PID file from a previous process and a corrupt PID
+file), config loading/validation, and polling-mode new-commit detection.
 
 CI (`.github/workflows/tests.yml`) runs the same suite on push/PR against
-Python 3.11 and 3.12.
+Python 3.11, 3.12, and 3.13.
+
+## Troubleshooting / FAQ
+
+**`python3 status.py` prints "No deployments recorded yet." even though I
+know a deploy ran.** `status.py` reads `HISTORY_DB` from the environment
+(default `./deployment_history.db`, relative to the current working
+directory). If the bot process was started from a different directory, or
+with a different `HISTORY_DB` value, it wrote to a different file than the
+one `status.py` is now reading. Run it with the same `HISTORY_DB` the bot
+uses, e.g. `HISTORY_DB=/path/to/deployment_history.db python3 status.py`.
+
+**The webhook endpoint always returns 401.** The most common cause is that
+GitHub is configured with "Content type: application/json" but the
+signature is being computed over the wrong bytes. `verify_signature()`
+recomputes the HMAC over the *raw* request body (`request.data`), so
+anything that re-serializes or reformats the payload before it reaches
+Flask (a proxy that pretty-prints JSON, for example) will break the
+signature. Confirm `WEBHOOK_SECRET` matches the secret configured on the
+GitHub webhook exactly (no trailing whitespace/newline from a `.env` file).
+
+**A deployment "succeeds" but the target process isn't actually running
+the new code.** If `RESTART_COMMAND` is empty, `_restart()` treats that as
+"nothing to restart" and reports success without touching any process —
+this is intentional for setups where the running process picks up changes
+some other way (e.g. a reverse proxy or auto-reloading dev server), but if
+you expected an actual restart, check that `RESTART_COMMAND` is set.
+
+**Loading `config.json` raises `Unknown key(s) in config.json: ...`.**
+This means a key in the file doesn't match a `Config` field (usually a
+typo, e.g. `target_branchh`). The error message lists the valid field
+names — see the table above for what each one does.
 
 ## License
 
