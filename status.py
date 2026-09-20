@@ -8,7 +8,7 @@ Usage:
 """
 import argparse
 
-from config import Config
+from config import Config, __version__
 from history import DeploymentHistory
 
 
@@ -28,6 +28,9 @@ def format_row(row):
 
 def main():
     parser = argparse.ArgumentParser(description="View auto-deploy-bot deployment history")
+    parser.add_argument(
+        "--version", action="version", version="auto-deploy-bot {}".format(__version__)
+    )
     parser.add_argument(
         "-n", "--limit", type=int, default=10, help="number of recent deployments to show"
     )

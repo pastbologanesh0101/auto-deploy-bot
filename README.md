@@ -147,7 +147,8 @@ $ python3 status.py
 ```
 
 `python3 status.py -n 25` shows more history; `-v` also prints the captured
-`git pull` / post-pull / restart output for each entry.
+`git pull` / post-pull / restart output for each entry; `--version` prints
+the installed version and exits.
 
 ## Rollback behavior
 

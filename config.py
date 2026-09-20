@@ -8,6 +8,8 @@ import json
 import os
 from dataclasses import dataclass
 
+__version__ = "0.1.0"
+
 
 @dataclass
 class Config:
