@@ -53,6 +53,22 @@ class TestProcessManager(unittest.TestCase):
         time.sleep(0.3)
         self.assertFalse(self.pm.is_running())
 
+    def test_is_running_true_when_read_from_a_fresh_instance(self):
+        # A second ProcessManager pointing at the same pid file (e.g. the
+        # CLI or a restarted bot process) has no Popen handle of its own,
+        # so is_running() must fall back to checking the raw PID.
+        self.pm.start("sleep 30")
+        other = ProcessManager(self.pid_file)
+        self.assertTrue(other.is_running())
+        self.assertTrue(other.stop())
+
+    def test_is_running_false_with_corrupt_pid_file(self):
+        # A pid file with non-numeric content (e.g. truncated by a crash
+        # mid-write) must not raise - it should be treated as "not running".
+        with open(self.pid_file, "w") as f:
+            f.write("not-a-pid\n")
+        self.assertFalse(self.pm.is_running())
+
 
 if __name__ == "__main__":
     unittest.main()
